@@ -1,2 +1,2 @@
 # pythonportfolio
-Contains Python scripts for Data Cleaning/Preparation, Data Analysis, and Machine Learning 
+Contains Python scripts for Data Cleaning/Preparation, Data Analysis, Data Modeling, Machine Learning, etc.
