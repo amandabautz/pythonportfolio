@@ -1,0 +1,42 @@
+Linear Regression Modeling: Data used to predict if John will like a pie based on the data given.
+
+#Import Pnadas and Numpy
+import numpy as np
+import pandas as pd
+
+#Import the data
+pie_df = pd.read_csv("JohnLikesPies.csv")
+
+#Prepare the data by naming features and seperating out positive class labels
+features = pd.get_dummies(pie_df, 
+                          columns=['Crust_Shape', 'Crust_Size', 'Crust_Shade', 'Filling_Size', 'Filling_Shade', 'Class'], 
+                          drop_first=True);
+                 
+response = pd.DataFrame(features, columns=['Class_Pos']);
+
+#Drop the Example Column and Class_Pos columns so the model doesn't train on that data
+features = features.drop(['Example'], axis = 1);
+features = features.drop(['Class_Pos'], axis = 1);
+
+#Perform the Model Fitting
+from sklearn.linear_model import LinearRegression
+reg_model = LinearRegression()
+reg_model.fit(features, response)
+
+#Exampine the Trained Model Parameters
+reg_model.coef_
+reg_model.intercept_
+
+#Make Predictions
+predictions = reg_model.predict(features)
+
+resp_comp = response.copy() 
+reg_outputs = [float(reg_model.predict(np.reshape(row, (1, -1)))) for row in features.itertuples(index=False)]
+predicted_resp = np.array([1 if reg_output > 0.5 else 0 for reg_output in reg_outputs])
+resp_comp = resp_comp.assign(Regression_Predictions = reg_outputs)
+resp_comp = resp_comp.assign(Predicted_Responses = predicted_resp)
+
+#Calculate Accuracy of the Model
+from sklearn.metrics import accuracy_score
+acc_score = accuracy_score(resp_comp['Class_Pos'], resp_comp['Predicted_Responses'])
+acc_score
