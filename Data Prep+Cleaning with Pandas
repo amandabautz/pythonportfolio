@@ -1,0 +1,63 @@
+#Data Manipulation using Pandas on California Housing Data. Uses 5 different CSV files. Combines all 5 into a workable 
+#DataFrame called housing
+
+#Import Pandas and Numpy
+import pandas as pd
+import numpy as np
+
+#create dataframes using 3 different housing csv files
+cal_med = pd.read_csv("cal_housing_medium.csv");
+cal_high = pd.read_csv("cal_housing_high.csv");
+cal_low = pd.read_csv("cal_housing_low.csv");
+
+#concatinate these dateframes into a new dataframe called 'cal_housing' that has all data from the 3
+cal_medhigh = pd.concat([cal_high, cal_med], axis = 'rows');
+cal_housing = pd.concat([cal_medhigh, cal_low], axis = 'rows');
+
+#drop the state column from the dataframe since it is of no use.
+cal_housing = cal_housing.drop(['state'], axis = 1);
+
+#calculate Median of housingMedianAge
+cal_housing['housingMedianAge'].median()
+
+#fill rows with missing values from the housingMedianAge column with its median value
+cal_housing['housingMedianAge'] = cal_housing['housingMedianAge'].fillna(cal_housing['housingMedianAge'].median());
+
+#drop rows with missing values from the medianHousingValue column
+cal_housing = cal_housing.dropna(subset=['medianHouseValue'])
+
+#scale medianIncome to express the values in 10s of thousands of dollars
+cal_housing['medianIncome'] = cal_housing['medianIncome'].div(10000)
+
+#change median income values >= 15.0001 to 15.0001 and <=0.4999 to 0.4999 for consistancy
+cal_housing['medianIncome'] = cal_housing['medianIncome'].apply(lambda x: 0.4999 if x <= 0.4999 else x);
+cal_housing['medianIncome'] = cal_housing['medianIncome'].apply(lambda x: 15.0001 if x >= 15.0001 else x);
+
+#revert medianHouseValue back to actual dollars
+cal_housing['medianHouseValue'] = cal_housing['medianHouseValue'] * 1000
+
+#create dataframes for the other twp CSV files
+long_lat = pd.read_csv("long_lat.csv");
+ocean = pd.read_csv("ocean_proximity.csv");
+
+#merge the two dataframes so that they combine based on matching long and lat values into one dataframe called area
+area = ocean.merge(long_lat, on = ('longitude', 'latitude'))
+
+#merge cal_housing and area on the id columns to get a single dataframe called housing
+housing = cal_housing.merge(area, on='id')
+
+#change column names where necessary for consistancy and readability
+housing = housing.rename(columns ={'medianHouseValue': 'median_house_value', 'housingMedianAge': 'housing_median_age', 'totalBedrooms': 'total_bedrooms', 
+                                   'totalRooms': 'total_rooms', 'medianIncome': 'median_income'})
+ 
+#sort by id in ascending (default) order
+housing.sort_values(by=['id'], inplace = True)
+
+#drop the id column from the dataframe
+housing = housing.drop(['id'], axis = 1);
+
+#reorder columns
+housing = housing[['longitude', 'latitude', 'housing_median_age', 'total_rooms', 'total_bedrooms', 'population', 'households', 'median_income', 'median_house_value', 'ocean_proximity']]
+
+#reset the index of the dataframe
+housing = housing.reset_index(drop=True)
