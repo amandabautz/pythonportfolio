@@ -1,4 +1,5 @@
-Linear Regression Modeling: Data used to predict if John will like a pie based on the data given.
+#Linear Regression Modeling: Data used to predict if John will like a pie based on the data given.
+#Uses Pandas, Numpy, and Scikit-Learn
 
 #Import Pnadas and Numpy
 import numpy as np
